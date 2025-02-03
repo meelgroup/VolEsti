@@ -23,7 +23,10 @@ std::pair<NT, NT> get_mean_variance(std::vector<NT>& vec)
     NT M2 = 0;
     NT variance = 0;
     NT delta;
-
+    assert(!vec.empty() && "Input vector is empty");
+    for (const auto& val : vec) {
+        assert(std::isfinite(val) && "Input vector contains non-finite values");
+    }
     unsigned int i=0;
     for (auto vecit = vec.begin(); vecit!=vec.end(); vecit++, i++)
     {
@@ -32,6 +35,12 @@ std::pair<NT, NT> get_mean_variance(std::vector<NT>& vec)
         M2 += delta * (*vecit - mean);
         variance = M2 / (i + 1);
     }
+
+    assert(std::isfinite(mean) && "Computed mean is not a finite number");
+    assert(std::isfinite(variance) && "Computed variance is not a finite number");
+
+
+
     return std::pair<NT, NT> (mean, variance);
 }
 

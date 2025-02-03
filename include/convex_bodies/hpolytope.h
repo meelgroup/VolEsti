@@ -935,6 +935,7 @@ public:
     // return for each facet the distance from the origin
     std::vector<NT> get_dists(NT const& radius) const
     {
+        std::cout << "c [volesti] return for each facet the distance from the origin" << std::endl;
         unsigned int i=0;
         std::vector <NT> dists(num_of_hyperplanes(), NT(0));
         typename std::vector<NT>::iterator disit = dists.begin();
