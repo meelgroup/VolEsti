@@ -41,9 +41,9 @@ bool is_inner_point_nan_inf(VT const& p)
 /// This class describes a polytope in H-representation or an H-polytope
 /// i.e. a polytope defined by a set of linear inequalities
 /// \tparam Point Point type
-template 
+template
 <
-    typename Point, 
+    typename Point,
     typename MT_type = Eigen::Matrix<typename Point::FT, Eigen::Dynamic, Eigen::Dynamic>
 >
 class HPolytope {
@@ -142,16 +142,19 @@ public:
     {
         normalize();
         if (!has_ball) {
-            
+
             has_ball = true;
             NT const tol = 1e-08;
             std::tuple<VT, NT, bool> inner_ball = max_inscribed_ball(A, b, 5000, tol);
+            // std::cout << "c internal method to count inner ball returned radius: "<< std::get<1>(inner_ball) << std::endl;
+            // _inner_ball = ComputeChebychevBall<NT, Point>(A, b); // use lpsolve library
+            // std::cout << "c lpsolve returned radius: "<< _inner_ball.second << std::endl;
 
             // check if the solution is feasible
             if (is_in(Point(std::get<0>(inner_ball))) == 0 || std::get<1>(inner_ball) < tol/2.0 ||
                 std::isnan(std::get<1>(inner_ball)) || std::isinf(std::get<1>(inner_ball)) ||
                 is_inner_point_nan_inf(std::get<0>(inner_ball))) {
-                
+
                 std::cerr << "Failed to compute max inscribed ball, trying to use lpsolve" << std::endl;
                 #ifndef DISABLE_LPSOLVE
                     _inner_ball = ComputeChebychevBall<NT, Point>(A, b); // use lpsolve library
@@ -591,10 +594,10 @@ public:
 
             *(Av_data + it.row()) += (-2.0 * inner_prev) * it.value();
 
-            // b(row) - Ar(row) = (old_val(row) - params.moved_dist) * old_Av(row) 
-            // new_val(row) = (b(row) - Ar(row)                                ) / new_Av(row) + params.moved_dist 
+            // b(row) - Ar(row) = (old_val(row) - params.moved_dist) * old_Av(row)
+            // new_val(row) = (b(row) - Ar(row)                                ) / new_Av(row) + params.moved_dist
             // new_val(row) = ((old_val(row) - params.moved_dist) * old_Av(row)) / new_Av(row) + params.moved_dist
-            
+
             // new_val(row) = (old_val(row) - params.moved_dist) * old_Av(row)                                   / new_Av(row) + params.moved_dist;
             // new_val(row) = (old_val(row) - params.moved_dist) * (new_Av(row) + 2.0 * inner_prev * it.value()) / new_Av(row) + params.moved_dist;
             // new_val(row) = (old_val(row) - params.moved_dist) * (1 + (2.0 * inner_prev * it.value()) / new_Av(row) ) + params.moved_dist;

@@ -16,7 +16,7 @@
 #ifndef VOLUME_COOLING_GAUSSIANS_CRHMC_HPP
 #define VOLUME_COOLING_GAUSSIANS_CRHMC_HPP
 
-//#define VOLESTI_DEBUG
+#define VOLESTI_DEBUG
 
 #include "volume/volume_cooling_gaussians.hpp"
 #include "preprocess/crhmc/crhmc_problem.h"
@@ -61,7 +61,7 @@ NT get_next_gaussian(Polytope& P,
 
     //sample N points
     PushBackWalkPolicy push_back_policy;
-    bool raw_output = false; 
+    bool raw_output = false;
 
     typedef CrhmcRandomPointGenerator<CRHMCWalkType> CRHMCRandomPointGenerator;
 
@@ -87,7 +87,7 @@ NT get_next_gaussian(Polytope& P,
                 k = k / 2;
             }
             done = true;
-        } 
+        }
         else {
             k = 2 * k;
         }
@@ -117,14 +117,14 @@ void compute_annealing_schedule(Polytope& P,
 {
     typedef typename Polytope::PointType Point;
     typedef typename Polytope::MT 	MT;
-    
+
     typedef typename GaussianFunctor::FunctionFunctor<Point>    Func;
     typedef typename GaussianFunctor::GradientFunctor<Point>    Grad;
     typedef typename GaussianFunctor::HessianFunctor<Point>     Hess;
     typedef typename GaussianFunctor::parameters<NT, Point>     func_params;
 
     typedef crhmc_input<MT, Point, Func, Grad, Hess> Input;
-    typedef crhmc_problem<Point, Input> CrhmcProblem;   
+    typedef crhmc_problem<Point, Input> CrhmcProblem;
 
     typedef ImplicitMidpointODESolver<Point, NT, CrhmcProblem, Grad, simdLen> Solver;
 
@@ -174,11 +174,11 @@ void compute_annealing_schedule(Polytope& P,
         auto steps = totalSteps;
 
         //TODO: potential problem creation and preprocessing optimization
-        
+
         //create the crhmc problem for this variance
         int dimension = P.dimension();
         func_params f_params = func_params(Point(dimension), a_vals[it], 1);
-        
+
         Func f(f_params);
         Grad g(f_params);
         Hess h(f_params);
@@ -272,7 +272,7 @@ double volume_cooling_gaussians(Polytope& Pin,
     typedef typename GaussianFunctor::parameters<NT, Point>     func_params;
 
     typedef crhmc_input<MT, Point, Func, Grad, Hess> Input;
-    typedef crhmc_problem<Point, Input> CrhmcProblem;   
+    typedef crhmc_problem<Point, Input> CrhmcProblem;
 
     typedef ImplicitMidpointODESolver<Point, NT, CrhmcProblem, Grad, simdLen> Solver;
 
@@ -291,7 +291,7 @@ double volume_cooling_gaussians(Polytope& Pin,
                   NT,
                   Grad
           > crhmc_walk_params;
-    
+
     typedef CrhmcRandomPointGenerator<CRHMCWalkType> CRHMCRandomPointGenerator;
 
     auto P(Pin); //copy and work with P because we are going to shift
@@ -375,7 +375,7 @@ double volume_cooling_gaussians(Polytope& Pin,
         //creating the walk object
         int dimension = P.dimension();
         func_params f_params = func_params(Point(dimension), *avalsIt, 1);
-        
+
         Func f(f_params);
         Grad g(f_params);
         Hess h(f_params);
