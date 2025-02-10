@@ -8,66 +8,91 @@
 // Licensed under GNU LGPL.3, see LICENCE file
 
 #include "Eigen/Eigen"
-#include <vector>
 #include "cartesian_geom/cartesian_kernel.h"
 #include "known_polytope_generators.h"
 #include "random_walks/random_walks.hpp"
+#include <vector>
 
-#include "vpolytope.h"
-#include <iostream>
-#include <fstream>
 #include "misc.h"
+#include "vpolytope.h"
+#include <fstream>
+#include <iostream>
 #include <limits>
 
-#include "volume_cooling_gaussians.hpp"
 #include "volume_cooling_balls.hpp"
+#include "volume_cooling_gaussians.hpp"
 
 typedef double NT;
-typedef Cartesian <NT> Kernel;
+typedef Cartesian<NT> Kernel;
 typedef typename Kernel::Point Point;
 typedef BoostRandomNumberGenerator<boost::mt19937, NT, 3> RNGType;
-typedef VPolytope <Point> VPOLYTOPE;
+typedef VPolytope<Point> VPOLYTOPE;
 
-void calculateVolumes(VPOLYTOPE &VP) {
-	// Setup parameters for calculating volume
-	int walk_len = 10 + VP.dimension()/10;
-	NT e=0.1;
+void calculateVolumes(VPOLYTOPE &VP, std::string algo, int walk_len = 0) {
+  // Setup parameters for calculating volume
+  int walk_len_act = 10 + VP.dimension() / 10;
 
-	// Calculating volume of the passed polytope
-	NT volume1 = volume_cooling_balls<BallWalk, RNGType, VPOLYTOPE>(VP, e, walk_len).second;
-	NT volume2 = volume_cooling_gaussians<GaussianBallWalk, RNGType>(VP, e, walk_len);
+  if (walk_len > 0) {
+    std::cout << "c [volesti] Using walk length: " << walk_len
+              << " calculated walk length: " << walk_len_act << "\n";
+  } else {
+    walk_len = walk_len_act;
+    std::cout << "c [volesti] Using walk length: " << walk_len_act << "\n";
+  }
 
-	std::cout<<"\t Using Cooling Balls method: "<<volume1<<"\n";
-	std::cout<<"\t Using Cooling Gaussians method: "<<volume2<<"\n";
+  NT e = 0.1;
+  NT volume = 0;
+
+
+  if (algo == "coolingball") {
+    std::cout << "c [volesti] Using Cooling Balls method\n";
+    volume = volume_cooling_balls<BallWalk, RNGType, VPOLYTOPE>(VP, e, walk_len)
+                 .second;
+
+  } else if (algo == "coolinggauss") {
+    std::cout << "c [volesti] Using Cooling Gaussians method\n";
+    volume =
+        volume_cooling_gaussians<GaussianBallWalk, RNGType>(VP, e, walk_len);
+  } else {
+    std::cerr << "Unknown algorithm: " << algo << std::endl;
+    return;
+  }
+
+  if (volume < 0)
+    std::cout << "c vol 0\n";
+  else
+    std::cout << "c vol " << volume << std::endl;
+
 }
 
+int main(int argc, char *argv[]) {
 
-int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0]
+              << " <input_file> [--algorithm "
+                 "<coolinggauss|coolingball|seqball>] [--walklen <length>]"
+              << std::endl;
+    return 1;
+  }
+  std::string fileName(argv[1]);
+  std::string algorithm = "coolinggauss";
+  int walk_len = 10;
 
-	// Generating a 4-dimensional VPolytope
-	VPOLYTOPE VP1 = generate_cross<VPOLYTOPE>(4, true);
-	std::cout<<"Polytope VP1: \n";
-	VP1.print();
-	std::cout<<"\n";
+  for (int i = 2; i < argc; ++i) {
+    if (std::string(argv[i]) == "--algorithm" && i + 1 < argc) {
+      algorithm = argv[++i];
+      std::cout << "c [volesti] Using algorithm: " << algorithm << "\n";
+    } else if (std::string(argv[i]) == "--walklen" && i + 1 < argc) {
+      walk_len = std::stoi(argv[++i]);
+    }
+  }
+  std::ifstream inp;
+  std::vector<std::vector<NT>> Pin;
+  inp.open(fileName, std::ifstream::in);
+  read_pointset(inp, Pin);
 
-	std::cout<<"Volume of VP1: \n";
-	calculateVolumes(VP1);
+  VPOLYTOPE VP2(Pin);
+  calculateVolumes(VP2, algorithm, walk_len);
 
-	// Reading a VPolytope from ext file
-	std::string fileName("data/cross_10.ext");
-	std::cout<<"Reading input from file..."<<std::endl;
-	std::ifstream inp;
-	std::vector<std::vector<NT> > Pin;
-	inp.open(fileName, std::ifstream::in);
-	read_pointset(inp,Pin);
-
-	VPOLYTOPE VP2(Pin);
-	std::cout<<"Polytope VP2: \n";
-	VP2.print();
-	std::cout<<"\n";
-
-	std::cout<<"Volume of VP2: \n";
-	calculateVolumes(VP2);
-
-	return 0;
+  return 0;
 }

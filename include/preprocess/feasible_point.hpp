@@ -27,6 +27,12 @@ VT compute_feasible_point(MT const& A, VT const& b)
     {
         std::runtime_error("The computation of a feasible point failed.");
     }
+    std::cout << "c feasible point: ";
+    for (int i = 0; i < x.size(); ++i)
+    {
+        std::cout << x[i] << " ";
+    }
+    std::cout << std::endl;
     return x;
 }
 

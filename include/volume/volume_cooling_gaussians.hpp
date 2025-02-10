@@ -28,6 +28,7 @@
 #include "sampling/random_point_generators.hpp"
 #include "volume/math_helpers.hpp"
 
+
 /* -------------------------------------------------------------------------- */
 /*  Helpers for random walks
 /* -------------------------------------------------------------------------- */
@@ -45,6 +46,11 @@ struct update_delta<GaussianBallWalk::Walk<Polytope, RandomNumberGenerator>> {
     walk.update_delta(delta);
   }
 };
+
+typedef double NT;
+typedef Cartesian <NT> Kernel;
+typedef typename Kernel::Point Point;
+
 
 /* -------------------------------------------------------------------------- */
 /*  Algorithms
@@ -67,7 +73,21 @@ void get_first_gaussian(Polytope &P, NT const &frac, NT const &chebychev_radius,
 
   std::cout << "c [volesti] Getting Dist based on Radius: " << chebychev_radius
             << std::endl;
-  std::vector<NT> dists = P.get_dists(0);
+  int dim = P.dimension();
+    auto InnerBall = P.ComputeInnerBall();
+
+  Point centre = InnerBall.first;
+  std::cout << "c [volesti] New Centre: ";
+  for (int i = 0; i < centre.dimension(); ++i) {
+    std::cout << centre[i] << " ";
+  }
+  std::cout << std::endl;
+  Point orig(dim);
+
+  if (!P.is_in(orig)) {
+    throw std::runtime_error("The origin is not inside the polytope.");
+  }
+  std::vector<NT> dists = P.get_dists(chebychev_radius);
   NT lower = 0.0;
   NT upper = 1.0;
   std::cout << "c [volesti] Distances: ";
@@ -100,8 +120,8 @@ void get_first_gaussian(Polytope &P, NT const &frac, NT const &chebychev_radius,
 #endif
     return;
   }
-  std::cout << "Upper bound for a_0: " << upper << std::endl;
-  std::cout << "Lower bound for a_0: " << lower << std::endl;
+  std::cout << "c [volesti] bound for a_0: [" << lower << ", " << upper << "]" << std::endl;
+
 
   // get a_0 with binary search
   while (upper - lower > tol) {
@@ -119,11 +139,10 @@ void get_first_gaussian(Polytope &P, NT const &frac, NT const &chebychev_radius,
     }
   }
 
-  std::cout << "Upper bound for a_0: " << upper << std::endl;
-  std::cout << "Lower bound for a_0: " << lower << std::endl;
+  std::cout << "c [volesti] bound for a_0: [" << lower << ", " << upper << "]" << std::endl;
 
   a_vals.push_back((upper + lower) / NT(2.0));
-  std::cout << "First gaussian value: " << a_vals.back() << std::endl;
+  std::cout << "c [volesti] First gaussian value: " << a_vals.back() << std::endl;
   assert(std::isfinite(a_vals.back()) && "The last element of a_vals must be a real number");
 }
 
@@ -162,7 +181,6 @@ NT get_next_gaussian(Polytope &P, Point &p, NT const &a, const unsigned int &N,
     NT new_a = last_a * std::pow(ratio, k);
 
     auto fnit = fn.begin();
-    std::cout << "c [volesti] random points " << randPoints.size() << std::endl;
     for (auto pit = randPoints.begin(); pit != randPoints.end();
          ++pit, fnit++) {
       assert(std::isfinite(new_a) && "new_a must consist of real numbers");
@@ -229,10 +247,11 @@ void compute_annealing_schedule(Polytope &P, NT const &ratio, NT const &C,
 #endif
 
   Point p(n);
+  int gaussian_number = 1;
 
   while (true) {
     // Compute the next gaussian
-    std::cout << "c [volesti] Computing next gaussian..." << std::endl;
+    std::cout << "c [volesti] Computing  gaussian #" << gaussian_number++ << std::endl;
     NT next_a = get_next_gaussian<RandomPointGenerator>(
         P, p, a_vals[it], N, ratio, C, walk_length, rng);
 

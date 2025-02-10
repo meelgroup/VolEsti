@@ -16,7 +16,7 @@
 /*
     This implmentation computes the largest inscribed ball in a given convex polytope P.
     The polytope has to be given in H-representation P = {x | Ax <= b} and the rows of A
-    has to be normalized. It solves the Linear program: max t, s.t. Ax + t*e <= b, where 
+    has to be normalized. It solves the Linear program: max t, s.t. Ax + t*e <= b, where
     e is the vector of ones.
 
     The implementation is based on Yin Zhang's Matlab implementation in https://github.com/Bounciness/Volume-and-Sampling/blob/1c7adfb46c2c01037e625db76ff00e73616441d4/external/mve11/mve_cobra/mve_presolve_cobra.m
@@ -59,11 +59,12 @@ void calcstep(MT const& A, MT const& A_trans, MT const& B,
     }
 }
 
+
 // Using MT as to deal with both dense and sparse matrices
 template <typename MT, typename VT, typename NT>
-std::tuple<VT, NT, bool>  max_inscribed_ball(MT const& A, VT const& b, 
+std::tuple<VT, NT, bool>  max_inscribed_ball(MT const& A, VT const& b,
                                              unsigned int maxiter, NT tol,
-                                             const bool feasibility_only = false) 
+                                             const bool feasibility_only = false)
 {
     //typedef matrix_computational_operator<MT> mat_op;
     int m = A.rows(), n = A.cols();
@@ -81,10 +82,10 @@ std::tuple<VT, NT, bool>  max_inscribed_ball(MT const& A, VT const& b,
     VT dsc = ds, dy = o_m, mu_ds_dy(m), tmp(m), rhs(n + 1);
     VT dyc = dy, r1(m), r2(n), r4(m), r23(n + 1), AtDe(n), d(m);
 
-    NT dt = NT(0), dtc = NT(0), tau, sigma0 = 0.2, r3, gap, 
+    NT dt = NT(0), dtc = NT(0), tau, sigma0 = 0.2, r3, gap,
        prif, drif, rgap, total_err, alphap, alphad,
        ratio, sigma, mu, t_prev = 1000.0 * t + 100.0;
-    
+
     NT const tau0 = 0.995, power_num = 5.0 * std::pow(10.0, 15.0);
     NT *vec_iter1, *vec_iter2, *vec_iter3, *vec_iter4;
 
@@ -113,17 +114,17 @@ std::tuple<VT, NT, bool>  max_inscribed_ball(MT const& A, VT const& b,
         total_err = std::max(total_err, rgap);
 
         // progress output & check stopping
-        if ( (total_err < tol && t > 0) || 
+        if ( (total_err < tol && t > 0) ||
              ( t > 0 && ( (std::abs(t - t_prev) <= tol * std::min(std::abs(t), std::abs(t_prev)) ||
                            std::abs(t - t_prev) <= tol) && i > 10) ) ||
-             (feasibility_only && t > tol/2.0 && i > 0) )  
+             (feasibility_only && t > tol/2.0 && i > 0) )
         {
             //converged
             converge = true;
             break;
         }
 
-        if ((dt > 10000.0 * bnrm || t > 10000000.0 * bnrm) && i > 20) 
+        if ((dt > 10000.0 * bnrm || t > 10000000.0 * bnrm) && i > 20)
         {
             //unbounded
             converge = false;
