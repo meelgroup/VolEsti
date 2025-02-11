@@ -133,7 +133,7 @@ std::pair<Point, NT> ComputeChebychevBall(const MT &A, const VT &b) {
   set_maxim(lp);
 
   /* I only want to see important messages on screen while solving */
-  set_verbose(lp, 7);
+  set_verbose(lp, 0);
 
   /* Now let lpsolve calculate a solution */
   try {

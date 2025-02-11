@@ -56,6 +56,15 @@ else()
 
 endif(DISABLE_NLP_ORACLES)
 
+find_library(CDDLIB NAMES libcddgmp.so PATHS /usr/local/lib /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
+
+if (NOT CDDLIB)
+  message(FATAL_ERROR "This program requires the cddlib library, and will not be compiled.")
+else()
+  message(STATUS "Library cddlib found: ${CDDLIB}")
+  include_directories(/usr/include/cdd)
+endif()
+
 include("../../external/cmake-files/Eigen.cmake")
 GetEigen()
 
@@ -99,4 +108,5 @@ add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-ldl")
 add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-DBOOST_NO_AUTO_PTR")
 
 add_executable (volume volume.cpp)
-TARGET_LINK_LIBRARIES(volume lp_solve)
+TARGET_LINK_LIBRARIES(volume lp_solve ${CDDLIB} cdd)
+# target_link_libraries(${PROJECT_NAME} PUBLIC cdd::cdd)
