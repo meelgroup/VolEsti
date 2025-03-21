@@ -29,6 +29,9 @@ extern "C" {
 }
 #undef set_int
 #include "cdd/cdd.h"
+#include <gmp.h>
+
+#include "helper.hpp"
 
 typedef double NT;
 typedef Cartesian<NT> Kernel;
@@ -37,22 +40,12 @@ typedef BoostRandomNumberGenerator<boost::mt19937, NT, 3> RNGType;
 typedef VPolytope<Point> VPOLYTOPE;
 typedef HPolytope<Point> HPOLYTOPE;
 
-int get_walk_len(int dim, int walk_len) {
-  int walk_len_act = 10 + dim / 10;
 
-  if (walk_len > 0) {
-    std::cout << "c [volesti] Using walk length: " << walk_len
-              << " calculated walk length: " << walk_len_act << "\n";
-  } else {
-    walk_len = walk_len_act;
-    std::cout << "c [volesti] Using walk length: " << walk_len_act << "\n";
-  }
-
-  return walk_len;
-}
 
 template <typename NT, typename MT, typename VT>
 void SimplifyPolytope(MT &A, VT &b) {
+  std::cout << "c [volesti] Simplifying polytope\n";
+
   dd_set_global_constants();
   dd_MatrixPtr M = dd_CreateMatrix(A.rows(), A.cols() + 1);
   M->representation = dd_Inequality;
@@ -66,6 +59,16 @@ void SimplifyPolytope(MT &A, VT &b) {
   dd_rowset impl_lin, redset;
   dd_rowindex newpos;
   dd_ErrorType err;
+
+check_polytope_consistency(M);
+
+mpz_t integer;
+mpz_init_set_ui(integer, 5);
+mpz_t integer_copy;
+mpz_init(integer_copy);
+mpz_set(integer_copy, integer);
+
+// std::cout << "c [volesti] Checks passed. Now simplifying polytope" << (int)integer_copy << std::endl;
   dd_MatrixCanonicalize(&M, &impl_lin, &redset, &newpos, &err);
   if (err != dd_NoError) {
     // std::cerr << "Error in cddlib: " << dd_ErrorString(err) << std::endl;
@@ -86,13 +89,15 @@ void SimplifyPolytope(MT &A, VT &b) {
 
   dd_FreeMatrix(M);
   dd_free_global_constants();
+  std::cout << "c [volesti] Simplified polytope\n";
+
 }
 
 NT calculateVolumesHP(HPOLYTOPE &HP, std::string algo, int walk_len = 0) {
   // Simplify the polytope
-  Eigen::MatrixXd A_tmp = HP.get_mat();
-  Eigen::VectorXd b_tmp = HP.get_vec();
-  SimplifyPolytope<NT>(A_tmp, b_tmp);
+  // Eigen::MatrixXd A_tmp = HP.get_mat();
+  // Eigen::VectorXd b_tmp = HP.get_vec();
+  // SimplifyPolytope<NT>(A_tmp, b_tmp);
   // HP = HPOLYTOPE(A_tmp, b_tmp);
 
   // Setup parameters for calculating volume
@@ -119,9 +124,7 @@ NT calculateVolumesHP(HPOLYTOPE &HP, std::string algo, int walk_len = 0) {
 NT calculateVolumesVP(VPOLYTOPE &VP, std::string algo, int walk_len = 0) {
   // Simplify the polytope
   // TODO : SimplifyPolytope should not be working for VPolytope
-  Eigen::MatrixXd A_tmp = VP.get_mat();
-  Eigen::VectorXd b_tmp = VP.get_vec();
-  SimplifyPolytope<NT>(A_tmp, b_tmp);
+
 
   // Setup parameters for calculating volume
   walk_len = get_walk_len(VP.dimension(), walk_len);
@@ -149,7 +152,7 @@ int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0]
               << " <input_file> [--algorithm "
-                 "<coolinggauss|coolingball|seqball>] [--walklen <length>]"
+                 "<coolinggauss|coolingball|seqball>] [--walklen <length>] [--vpoly]"
               << std::endl;
     return 1;
   }
@@ -160,6 +163,7 @@ int main(int argc, char *argv[]) {
 
   bool vpolytope = false;
   bool verb = false;
+  bool sample = false;
 
   for (int i = 2; i < argc; ++i) {
     if (std::string(argv[i]) == "--algorithm" && i + 1 < argc) {
@@ -171,17 +175,30 @@ int main(int argc, char *argv[]) {
       vpolytope = true;
       std::cout << "c [volesti] Expecting VPolytope\n";
     }
+
   }
   std::ifstream inp;
   std::vector<std::vector<NT>> Pin;
   inp.open(fileName, std::ifstream::in);
+  if (!inp.is_open()) {
+    std::cerr << "Error: Cannot open input file: " << fileName << std::endl;
+    return 1;
+  }
+  std::cout << "c [volesti] Reading input file: " << fileName << "\n";
+
   read_pointset(inp, Pin);
+  std::cout << "c [volesti] Read " << Pin.size() << " points\n";
+
+
 
   if (vpolytope) {
     VPOLYTOPE VP2(Pin);
     volume = calculateVolumesVP(VP2, algorithm, walk_len);
   } else {
     HPOLYTOPE HP2(Pin);
+        Eigen::MatrixXd A_tmp = HP2.get_mat();
+  Eigen::VectorXd b_tmp = HP2.get_vec();
+  // SimplifyPolytope<NT>(A_tmp, b_tmp);
     volume = calculateVolumesHP(HP2, algorithm, walk_len);
   }
 

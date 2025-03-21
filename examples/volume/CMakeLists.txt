@@ -15,11 +15,19 @@ if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
+# set(BUILD_SHARED_LIBS OFF)
+# set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 
 option(DISABLE_NLP_ORACLES "Disable non-linear oracles (used in collocation)" ON)
 option(BUILTIN_EIGEN "Use eigen from ../../external" OFF)
 
-
+  find_library(GMP_LIB gmp)
+  if (NOT GMP_LIB)
+    message(FATAL_ERROR "This program requires the gmp library, and will not be compiled.")
+  else()
+    message(STATUS "Library gmp found: ${GMP_LIB}")
+  endif(NOT GMP_LIB)
 if(DISABLE_NLP_ORACLES)
   add_definitions(-DDISABLE_NLP_ORACLES)
 else()
@@ -29,6 +37,8 @@ else()
   find_library(MPSOLVE NAMES libmps.so PATHS /usr/local/lib)
   find_library(PTHREAD NAMES libpthread.so PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
   find_library(FFTW3 NAMES libfftw3.so.3 PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
+
+
 
   if (NOT IFOPT)
 
@@ -56,7 +66,7 @@ else()
 
 endif(DISABLE_NLP_ORACLES)
 
-find_library(CDDLIB NAMES libcddgmp.so PATHS /usr/local/lib /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
+find_library(CDDLIB NAMES libcddgmp.a PATHS /usr/local/lib /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
 
 if (NOT CDDLIB)
   message(FATAL_ERROR "This program requires the cddlib library, and will not be compiled.")
@@ -107,6 +117,10 @@ add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-lm")
 add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-ldl")
 add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-DBOOST_NO_AUTO_PTR")
 
+
 add_executable (volume volume.cpp)
-TARGET_LINK_LIBRARIES(volume lp_solve ${CDDLIB} cdd)
+TARGET_LINK_LIBRARIES(volume lp_solve ${CDDLIB} cdd ${GMP_LIB})
+
+add_executable (sample sampler.cpp)
+TARGET_LINK_LIBRARIES(sample lp_solve ${CDDLIB} cdd ${GMP_LIB})
 # target_link_libraries(${PROJECT_NAME} PUBLIC cdd::cdd)
