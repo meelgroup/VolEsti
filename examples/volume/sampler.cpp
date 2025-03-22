@@ -165,7 +165,16 @@ int main(int argc, char *argv[]) {
     HP.ComputeInnerBall();
 
     RNGType rng(HP.dimension());
+    if (algorithm == "accelarated") {
+      std::cout << "c [sampler] Using accelerated billiard walk\n";
+      sample_using_uniform_accelerated_billiard_walk(HP, rng, walk_len, num_points, outFileName);
+    } else if (algorithm == "gaussian") {
+      std::cout << "c [sampler] Using gaussian billiard walk\n";
+      sample_using_gaussian_billiard_walk(HP, rng, walk_len, num_points);
+    } else {
+      std::cout << "c [sampler] Using uniform billiard walk\n";
     sample_using_uniform_billiard_walk(HP, rng, walk_len, num_points, outFileName);
+  }
     // sample_using_uniform_accelerated_billiard_walk(HP, rng, walk_len, num_points);
     // sample_using_gaussian_billiard_walk(HP, rng, walk_len, num_points);
 
