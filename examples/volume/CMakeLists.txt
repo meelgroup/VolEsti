@@ -4,10 +4,10 @@
 # Contributed and/or modified by Vaibhav Thakkar
 # Licensed under GNU LGPL.3, see LICENCE file
 
-project( VolEsti )
 
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
+project( VolEsti )
 
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
@@ -15,9 +15,9 @@ if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-# set(BUILD_SHARED_LIBS OFF)
-# set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 
 option(DISABLE_NLP_ORACLES "Disable non-linear oracles (used in collocation)" ON)
 option(BUILTIN_EIGEN "Use eigen from ../../external" OFF)
@@ -33,7 +33,7 @@ if(DISABLE_NLP_ORACLES)
 else()
   find_library(IFOPT NAMES libifopt_core.so PATHS /usr/local/lib)
   find_library(IFOPT_IPOPT NAMES libifopt_ipopt.so PATHS /usr/local/lib)
-  find_library(GMP NAMES libgmp.so PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
+  find_library(GMP NAMES libgmp.a PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
   find_library(MPSOLVE NAMES libmps.so PATHS /usr/local/lib)
   find_library(PTHREAD NAMES libpthread.so PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
   find_library(FFTW3 NAMES libfftw3.so.3 PATHS /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu)
