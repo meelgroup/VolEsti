@@ -93,7 +93,7 @@ mpz_set(integer_copy, integer);
 
 }
 
-NT calculateVolumesHP(HPOLYTOPE &HP, std::string algo, int walk_len = 0) {
+NT calculateVolumesHP(HPOLYTOPE &HP, std::string algo, int walk_len = 0, uint seed = 123) {
   // Simplify the polytope
   // Eigen::MatrixXd A_tmp = HP.get_mat();
   // Eigen::VectorXd b_tmp = HP.get_vec();
@@ -107,7 +107,7 @@ NT calculateVolumesHP(HPOLYTOPE &HP, std::string algo, int walk_len = 0) {
 
   if (algo == "coolingball") {
     std::cout << "c [volesti] Using Cooling Balls method\n";
-    volume = volume_cooling_balls<BallWalk, RNGType, HPOLYTOPE>(HP, e, walk_len)
+    volume = volume_cooling_balls<BallWalk, RNGType, HPOLYTOPE>(HP, e, walk_len, seed)
                  .second;
   } else if (algo == "coolinggauss") {
     std::cout << "c [volesti] Using Cooling Gaussians method\n";
@@ -164,6 +164,7 @@ int main(int argc, char *argv[]) {
   bool vpolytope = false;
   bool verb = false;
   bool sample = false;
+  uint seed = 123;
 
   for (int i = 2; i < argc; ++i) {
     if (std::string(argv[i]) == "--algorithm" && i + 1 < argc) {
@@ -174,11 +175,15 @@ int main(int argc, char *argv[]) {
     } else if (std::string(argv[i]) == "--vpoly") {
       vpolytope = true;
       std::cout << "c [volesti] Expecting VPolytope\n";
+    } else if (std::string(argv[i]) == "--seed") {
+      seed = std::stoi(argv[++i]);
     }
 
   }
   std::ifstream inp;
   std::vector<std::vector<NT>> Pin;
+  RNGType rng(seed);
+
   inp.open(fileName, std::ifstream::in);
   if (!inp.is_open()) {
     std::cerr << "Error: Cannot open input file: " << fileName << std::endl;

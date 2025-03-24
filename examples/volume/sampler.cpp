@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
   NT volume = 0;
 
   bool verb = false;
+  int seed = 123;
 
   for (int i = 2; i < argc; ++i) {
     if (std::string(argv[i]) == "--algorithm" && i + 1 < argc) {
@@ -145,6 +146,8 @@ int main(int argc, char *argv[]) {
       walk_len = std::stoi(argv[++i]);
     } else if (std::string(argv[i]) == "-n" && i + 1 < argc) {
       num_points = std::stoi(argv[++i]);
+    } else if (std::string(argv[i]) == "-s" && i + 1 < argc) {
+      seed = std::stoi(argv[++i]);
     }
 
   }
@@ -165,6 +168,10 @@ int main(int argc, char *argv[]) {
     HP.ComputeInnerBall();
 
     RNGType rng(HP.dimension());
+    rng.set_seed(seed);
+    if (verb) {
+      std::cout << "c [sampler] Using uniform billiard walk, dimension " << "\n";
+    }
     if (algorithm == "accelarated") {
       std::cout << "c [sampler] Using accelerated billiard walk\n";
       sample_using_uniform_accelerated_billiard_walk(HP, rng, walk_len, num_points, outFileName);

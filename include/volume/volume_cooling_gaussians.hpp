@@ -489,8 +489,9 @@ template <typename WalkTypePolicy = GaussianCDHRWalk,
 double volume_cooling_gaussians(Polytope &Pin,
                                 Cartesian<double>::Point const &interior_point,
                                 unsigned int const &walk_length = 1,
-                                double const &error = 0.1) {
+                                double const &error = 0.1, uint seed = 123) {
   RandomNumberGenerator rng(Pin.dimension());
+  rng.set_seed(seed);
   Pin.set_interior_point(interior_point);
 
   return volume_cooling_gaussians<WalkTypePolicy>(Pin, rng, error, walk_length);

@@ -826,9 +826,11 @@ template
 >
 std::pair<double, double> volume_cooling_balls(Polytope &Pin,
                                                double const& error = 0.1,
-                                               unsigned int const& walk_length = 1)
+                                               unsigned int const& walk_length = 1,
+                                            uint seed = 123)
 {
     RandomNumberGenerator rng(Pin.dimension());
+    rng.set_seed(seed);
     return volume_cooling_balls<WalkTypePolicy>(Pin, rng, error, walk_length);
 }
 
