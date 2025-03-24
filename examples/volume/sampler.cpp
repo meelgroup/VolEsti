@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
       walk_len = std::stoi(argv[++i]);
     } else if (std::string(argv[i]) == "-n" && i + 1 < argc) {
       num_points = std::stoi(argv[++i]);
-    } else if (std::string(argv[i]) == "-s" && i + 1 < argc) {
+    } else if (std::string(argv[i]) == "--seed" && i + 1 < argc) {
       seed = std::stoi(argv[++i]);
     }
 
