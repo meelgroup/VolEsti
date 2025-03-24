@@ -47,6 +47,7 @@ void sample_using_uniform_billiard_walk(HPOLYTOPE& HP, RNGType& rng, unsigned in
 
     std::vector<Point> randPoints;
     Point q(HP.dimension()); // origin
+    q = HP.get_an_inner_point();
     Generator::apply(HP, q, num_points, walk_len,
                      randPoints, push_back_policy, rng);
     write_to_file(filename, randPoints);
@@ -59,6 +60,7 @@ void sample_using_uniform_accelerated_billiard_walk(HPOLYTOPE& HP, RNGType& rng,
 
     std::vector<Point> randPoints;
     Point q(HP.dimension()); // origin
+    q = HP.get_an_inner_point();
     Generator::apply(HP, q, num_points, walk_len,
                      randPoints, push_back_policy, rng);
     write_to_file(filename, randPoints);
@@ -71,7 +73,7 @@ void sample_using_gaussian_billiard_walk(HPOLYTOPE& HP, RNGType& rng, unsigned i
 
     std::vector<Point> randPoints;
     Point q(HP.dimension()); // origin
-
+    q = HP.get_an_inner_point();
     // ----------- Get inscribed ellipsoid --------------------------------
     unsigned int max_iter = 150;
     NT tol = std::pow(10, -6.0), reg = std::pow(10, -4.0);
@@ -117,7 +119,6 @@ HPOLYTOPE visualization_example() {
 //     sample_using_gaussian_billiard_walk(HP, rng, walk_len, num_points);
 //     return 0;
 // }
-
 
 int main(int argc, char *argv[]) {
 

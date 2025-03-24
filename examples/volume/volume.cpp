@@ -183,6 +183,7 @@ int main(int argc, char *argv[]) {
   std::ifstream inp;
   std::vector<std::vector<NT>> Pin;
   RNGType rng(seed);
+  std::cout << "c [volesti] Seed: " << seed << "\n";
 
   inp.open(fileName, std::ifstream::in);
   if (!inp.is_open()) {
@@ -204,7 +205,7 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd A_tmp = HP2.get_mat();
   Eigen::VectorXd b_tmp = HP2.get_vec();
   // SimplifyPolytope<NT>(A_tmp, b_tmp);
-    volume = calculateVolumesHP(HP2, algorithm, walk_len);
+    volume = calculateVolumesHP(HP2, algorithm, walk_len, seed);
   }
 
   if (volume < 0)
