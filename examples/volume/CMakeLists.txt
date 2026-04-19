@@ -119,8 +119,8 @@ add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-DBOOST_NO_AUTO_PTR")
 
 
 add_executable (volume volume.cpp)
-TARGET_LINK_LIBRARIES(volume lp_solve ${CDDLIB} cdd ${GMP_LIB})
+TARGET_LINK_LIBRARIES(volume lp_solve ${CDDLIB} ${GMP_LIB})
 
 add_executable (sample sampler.cpp)
-TARGET_LINK_LIBRARIES(sample lp_solve ${CDDLIB} cdd ${GMP_LIB})
+TARGET_LINK_LIBRARIES(sample lp_solve ${CDDLIB} ${GMP_LIB})
 # target_link_libraries(${PROJECT_NAME} PUBLIC cdd::cdd)
