@@ -110,12 +110,11 @@ else ()
   add_compile_definitions("EIGEN_NO_DEBUG")
 endif ()
 
-add_definitions(${CMAKE_CXX_FLAGS} "-std=c++17")
-add_definitions(${CMAKE_CXX_FLAGS} "-O3")  # optimization of the compiler
-#add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-lgsl")
-add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-lm")
-add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-ldl")
-add_definitions(${CXX_COVERAGE_COMPILE_FLAGS} "-DBOOST_NO_AUTO_PTR")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-O3>)
+add_definitions("-DBOOST_NO_AUTO_PTR")
+add_definitions("-DGMPRATIONAL")
 
 
 add_executable (volume volume.cpp)
